@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h> 
 
+#include <sys/termios.h>
+
 /* we have about 1 << 16 memory locations */
 #define MEMORY_LOC_MAX 1 << 16
 uint16_t memory[MEMORY_LOC_MAX];
@@ -68,3 +70,12 @@ uint16_t sign_extend(uint16_t iset, int bit_count) {
   }
   return iset;
 }
+
+/* memory mapped registers are special registers*/
+/* not available in the normal registers table */
+/* to read and write to them, you need to read */
+/* and write to their memory locations */
+enum {
+  MR_KBSR = 0XFE00,   /* keyboard status */
+  MR_KBDR = 0XFE02    /* keyboard data */
+};
