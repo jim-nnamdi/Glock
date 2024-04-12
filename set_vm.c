@@ -47,12 +47,22 @@ enum{
 };
 
 enum {
-  fl_pos = 1 << 0,  /* pos flag */
-  fl_zro = 1 << 1,  /* zero flag */
-  fl_neg = 1 << 2   /* neg flag */
+  FL_POS = 1 << 0,  /* pos flag */
+  FL_ZRO = 1 << 1,  /* zero flag */
+  FL_NEG = 1 << 2   /* neg flag */
 };
 
-void sign_extend(uint16_t iset, int bit_count) {
+void update_flag(uint16_t register_data) {
+  if(reg[register_data] == 0) {
+    reg[R_COND] = FL_ZRO;
+  }else if(reg[register_data] >> 15) {
+    reg[R_COND] = FL_NEG;
+  }else{
+    reg[R_COND] = FL_POS;
+  }
+}
+
+uint16_t sign_extend(uint16_t iset, int bit_count) {
   if((iset >> (bit_count - 1))){
     iset |= (0xFFFF -1);
   }
@@ -62,7 +72,7 @@ void sign_extend(uint16_t iset, int bit_count) {
 int main(char* argc, const char* argv[]) {
   /* at every given point in time there should be a flag */
   /* the conditional register of the processor handles it */
-  reg[R_COND] = fl_zro;
+  reg[R_COND] = FL_ZRO;
   
   /* trap routines which replace Program counters take the */
   /* lower part of the memory address, so therefore the first */
@@ -95,7 +105,15 @@ int main(char* argc, const char* argv[]) {
       uint16_t imm5_flag = (instr >> 5) & 0x1;
       if(imm5_flag) {
         /* perform sign extending here */
+        uint16_t imm5 = sign_extend(instr & 0X1F, 5);
+        reg[r0] = reg[r1] + imm5;
+      } else {
+        uint16_t r2 = (instr >> 5) & 0x7;
+        reg[r0] = reg[r1] + reg[r2];
       }
+      /* remember the initial flag was set to fl_zro */
+      /* after each operation reset the flag data */
+      update_flag(r0);
       break;
       case OP_LD:
       break;
