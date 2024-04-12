@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/* we have about 1 << 16 memory locations */
 #define MEMORY_LOC_MAX 1 << 16
 uint16_t memory[MEMORY_LOC_MAX];
 
@@ -18,6 +19,13 @@ enum {
   R_COND,
   R_COUNT
 };
+
+/* 
+  store the registers inside an array
+  data handling would be done from the 
+  registers from the memory via the IS 
+ */
+uint16_t reg[R_COUNT];
 
 enum{
   OP_BR = 0,    /* branch */
@@ -43,3 +51,15 @@ enum {
   fl_zro = 1 << 1,  /* zero flag */
   fl_neg = 1 << 2   /* neg flag */
 };
+
+int main(char* argc, const char* argv[]) {
+  /* at every given point in time there should be a flag */
+  /* the conditional register of the processor handles it */
+  reg[R_COND] = fl_zro;
+  
+  /* trap routines which replace Program counters take the */
+  /* lower part of the memory address, so therefore the first */
+  /* memory location of our processor would be 0x3000 */
+  enum {PC_START = 0X3000};
+  reg[R_PC] = PC_START;
+}
