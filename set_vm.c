@@ -37,3 +37,9 @@ enum{
   OP_LEA,       /* load effective address */
   OP_TRAP       /* execute trap */
 };
+
+enum {
+  fl_pos = 1 << 0,  /* pos flag */
+  fl_zro = 1 << 1,  /* zero flag */
+  fl_neg = 1 << 2   /* neg flag */
+};
