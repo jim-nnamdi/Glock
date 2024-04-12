@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "and_ops.h"
+
 /* we have about 1 << 16 memory locations */
 #define MEMORY_LOC_MAX 1 << 16
 uint16_t memory[MEMORY_LOC_MAX];
@@ -52,7 +54,7 @@ enum {
   FL_NEG = 1 << 2   /* neg flag */
 };
 
-void update_flag(uint16_t register_data) {
+void* update_flag(uint16_t register_data) {
   if(reg[register_data] == 0) {
     reg[R_COND] = FL_ZRO;
   }else if(reg[register_data] >> 15) {
@@ -114,6 +116,12 @@ int main(char* argc, const char* argv[]) {
       /* remember the initial flag was set to fl_zro */
       /* after each operation reset the flag data */
       update_flag(r0);
+      break;
+      case OP_AND:
+      /* now hopefully this is not an issue */
+      /* parent update_flag takes r0 (instr >> 9) & 0x7 */
+      /* here i'm passing reg[r0] to get the initial val from the register */
+      bitwise_and_ops(instr,reg,update_flag(reg[r0]));
       break;
       case OP_LD:
       break;
