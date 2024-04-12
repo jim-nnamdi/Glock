@@ -1,2 +1,2 @@
 # Glock
-I'll try to actually make this descriptive in the long run, also am not trying to teach C or the concepts of Virtual machines or general computer architecture or even Memory mapping and all of that concept, this is more like an experimental repo to craft out a custom VM that should run on any Host OS. Also this would be taken with a pinch of salt. I work full time and really can only contribute to this on Friday nights or saturdays 🙂
+> Experimental VM
