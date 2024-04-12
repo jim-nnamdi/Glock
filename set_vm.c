@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "ops_inst_set/and_ops.h"
+#include "ops_inst_set/br__ops.h"
 #include "commons/common_set.h"
 
 int main(char* argc, const char* argv[]) {
@@ -55,7 +56,10 @@ int main(char* argc, const char* argv[]) {
       /* now hopefully this is not an issue */
       /* parent update_flag takes r0 (instr >> 9) & 0x7 */
       /* here i'm passing reg[r0] to get the initial val from the register */
-      bitwise_and_ops(instr,reg,update_flag(reg[r0]));
+      bitwise_and_ops(instr);
+      break;
+      case OP_BR:
+      bitwise_br_ops(instr);
       break;
       case OP_LD:
       break;
