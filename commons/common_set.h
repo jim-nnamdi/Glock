@@ -81,27 +81,30 @@ enum {
   MR_KBDR = 0XFE02    /* keyboard data */
 };
 
-struct termios original_tio;
+struct termios initial_terminal_data;
 
 void disable_input_buffering() {
-  tcgetattr(STDIN_FILENO, &original_tio);
-  struct termios new_tio = original_tio;
-  new_tio.c_lflag = ~ICANON & ~ECHO;
-  tcsetattr(STDIN_FILENO, TCSANOW, &new_tio); 
+  /* disable canonical which supports buffering, hence 
+     the program returns immediately instead of buffering
+  */
+ tcgetattr(STDIN_FILENO, &initial_terminal_data);
+ struct termios new_terminal_data = initial_terminal_data; /* copy original*/
+ new_terminal_data.c_lflag = ~ICANON & ~ECHO;
+ tcsetattr(STDIN_FILENO, TCSANOW, &new_terminal_data);
 }
 
 void restore_input_buffering() {
-  tcsetattr(STDIN_FILENO, TCSANOW, &original_tio);
+  tcsetattr(STDIN_FILENO, TCSANOW, &initial_terminal_data);
 }
 
-void check_key() {
+uint16_t check_key() {
   fd_set readfds;
   FD_ZERO(&readfds);
   FD_SET(STDIN_FILENO, &readfds);
 
-  struct timeval term_time_val;
-  term_time_val.tv_sec = 0;
-  term_time_val.tv_usec = 0;
-
-  return select(1, &readfds,NULL, NULL, &term_time_val);
+  struct timeval timeout;
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 0;
+  
+  return select(1, &readfds, NULL, NULL, &timeout) != 0; /* returns a non-zero value if a key is pressed */
 }
