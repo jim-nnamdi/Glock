@@ -55,7 +55,7 @@ enum {
   FL_NEG = 1 << 2   /* neg flag */
 };
 
-void* update_flag(uint16_t register_data) {
+void update_flag(uint16_t register_data) {
   if(reg[register_data] == 0) {
     reg[R_COND] = FL_ZRO;
   }else if(reg[register_data] >> 15) {
@@ -107,4 +107,20 @@ uint16_t check_key() {
   timeout.tv_usec = 0;
   
   return select(1, &readfds, NULL, NULL, &timeout) != 0; /* returns a non-zero value if a key is pressed */
+}
+
+uint16_t mem_read(uint16_t address) {
+  if(address == MR_KBSR){
+    if(check_key()){
+      memory[MR_KBSR] = (1 << 15);
+      memory[MR_KBDR] = getchar();
+    }else {
+      memory[MR_KBSR] = 0;
+    }
+  }
+  return memory[address];
+}
+
+void mem_write(uint16_t address, int data){
+  memory[address] = data;
 }
