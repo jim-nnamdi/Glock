@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "ops_inst_set/add_op.h"
 #include "ops_inst_set/and_ops.h"
 #include "ops_inst_set/br__ops.h"
 #include "ops_inst_set/load_indirect_ops.h"
@@ -14,9 +15,55 @@
 #include "ops_inst_set/store_op.h"
 #include "ops_inst_set/store_indirect_op.h"
 #include "ops_inst_set/store_reg_op.h"
-#include "commons/common_set.h"
 
-int main(char* argc, const char* argv[]) {
+#include "trap_routines/traprs.h"
+
+uint16_t swap16(uint16_t x);
+
+void read_image_file(FILE* file)
+{
+    /* the origin tells us where in memory to place the image */
+    uint16_t origin;
+    fread(&origin, sizeof(origin), 1, file);
+    origin = swap16(origin);
+
+    /* we know the maximum file size so we only need one fread */
+    uint16_t max_read = MEMORY_LOC_MAX - origin;
+    uint16_t* p = memory + origin;
+    size_t read = fread(p, sizeof(uint16_t), max_read, file);
+
+    /* swap to little endian */
+    while (read-- > 0)
+    {
+        *p = swap16(*p);
+        ++p;
+    }
+}
+
+uint16_t swap16(uint16_t x)
+{
+    return (x << 8) | (x >> 8);
+}
+
+int read_image(const char* image_path)
+{
+    FILE* file = fopen(image_path, "rb");
+    if (!file) { return 0; };
+    read_image_file(file);
+    fclose(file);
+    return 1;
+}
+
+void handle_interrupt(int signal) {
+  restore_input_buffering();
+  printf("\n");
+  exit(2);
+}
+
+int main(int argc, const char* argv[]) {
+  signal(SIGINT,handle_interrupt);
+  disable_input_buffering();
+
   /* at every given point in time there should be a flag */
   /* the conditional register of the processor handles it */
   reg[R_COND] = FL_ZRO;
@@ -41,26 +88,7 @@ int main(char* argc, const char* argv[]) {
       /* memory mapped instructions that come*/
       /* as addition operations */
       case OP_ADD:
-      uint16_t r0 = (instr >> 12) & 0x7;
-      uint16_t r1 = (instr >> 6) & 0x7;
-      
-      /* check for addressing modes */
-      /* After shifting, the result is then bitwise ANDed with 0x1. 
-      The value 0x1 in binary is 0000 0000 0000 0001, which has only 
-      the least significant bit set. The bitwise AND operation will 
-      thus zero out all bits of the result except for the least significant bit.*/
-      uint16_t imm5_flag = (instr >> 5) & 0x1;
-      if(imm5_flag) {
-        /* perform sign extending here */
-        uint16_t imm5 = sign_extend(instr & 0X1F, 5);
-        reg[r0] = reg[r1] + imm5;
-      } else {
-        uint16_t r2 = (instr >> 5) & 0x7;
-        reg[r0] = reg[r1] + reg[r2];
-      }
-      /* remember the initial flag was set to fl_zro */
-      /* after each operation reset the flag data */
-      update_flag(r0);
+      add_ops(instr);
       break;
       case OP_AND:
       /* now hopefully this is not an issue */
@@ -103,6 +131,28 @@ int main(char* argc, const char* argv[]) {
       break;
       default:
       break;
+    } 
+
+    reg[R_R7] = reg[R_PC];
+    switch(instr & 0xFF) {
+      case TRAP_GETC:
+        trap_getc();
+        break;
+    case TRAP_OUT:
+        trap_out();
+        break;
+    case TRAP_PUTS:
+        trap_puts();
+        break;
+    case TRAP_IN:
+        trap_in();
+        break;
+    case TRAP_PUTSP:
+      trap_putsp();
+        break;
+    case TRAP_HALT:
+        trap_halt();
+        break;
     }
   }
 }

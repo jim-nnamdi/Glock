@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "commons/common_set.h"
+#include "../commons/common_set.h"
 
-uint16_t bitwise_and_ops(
+void bitwise_and_ops(
   uint16_t instr
 ) {
   uint16_t r0 = (instr >> 9) & 0x7;

@@ -1,3 +1,7 @@
+
+#ifndef COMMON_SET_H
+#define COMMON_SET_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h> 
@@ -139,3 +143,5 @@ uint16_t mem_read(uint16_t address) {
 void mem_write(uint16_t address, int data){
   memory[address] = data;
 }
+
+#endif
