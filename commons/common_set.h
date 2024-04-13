@@ -3,6 +3,7 @@
 #include <unistd.h> 
 
 #include <sys/termios.h>
+#include <sys/time.h>
 
 /* we have about 1 << 16 memory locations */
 #define MEMORY_LOC_MAX 1 << 16
@@ -79,3 +80,28 @@ enum {
   MR_KBSR = 0XFE00,   /* keyboard status */
   MR_KBDR = 0XFE02    /* keyboard data */
 };
+
+struct termios original_tio;
+
+void disable_input_buffering() {
+  tcgetattr(STDIN_FILENO, &original_tio);
+  struct termios new_tio = original_tio;
+  new_tio.c_lflag = ~ICANON & ~ECHO;
+  tcsetattr(STDIN_FILENO, TCSANOW, &new_tio); 
+}
+
+void restore_input_buffering() {
+  tcsetattr(STDIN_FILENO, TCSANOW, &original_tio);
+}
+
+void check_key() {
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(STDIN_FILENO, &readfds);
+
+  struct timeval term_time_val;
+  term_time_val.tv_sec = 0;
+  term_time_val.tv_usec = 0;
+
+  return select(1, &readfds,NULL, NULL, &term_time_val);
+}
