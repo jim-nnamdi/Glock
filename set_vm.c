@@ -10,6 +10,10 @@
 #include "ops_inst_set/jmp_reg_op.h"
 #include "ops_inst_set/jmp_ops.h"
 #include "ops_inst_set/load_effective_address.h"
+#include "ops_inst_set/not_op.h"
+#include "ops_inst_set/store_op.h"
+#include "ops_inst_set/store_indirect_op.h"
+#include "ops_inst_set/store_reg_op.h"
 #include "commons/common_set.h"
 
 int main(char* argc, const char* argv[]) {
@@ -85,7 +89,17 @@ int main(char* argc, const char* argv[]) {
       case OP_LEA:
       load_effective_addr(instr);
       break;
+      case OP_NOT:
+      bitwise_not_operation(instr);
+      break;
       case OP_ST:
+      store_operation(instr);
+      break;
+      case OP_STR:
+      store_register_operation(instr);
+      break;
+      case OP_STI:
+      store_indirect_operation(instr);
       break;
       default:
       break;
