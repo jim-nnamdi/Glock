@@ -55,6 +55,21 @@ enum {
   FL_NEG = 1 << 2   /* neg flag */
 };
 
+/* trap routines are specifically used 
+   for accepting input data coming from
+   the keyboard or any input device, also
+   they consist of the lower memory bits
+   in the processor
+*/
+enum {
+  TRAP_GETC = 0x20,     /* get a character don't echo */
+  TRAP_OUT = 0X21,      /* output a character */
+  TRAP_PUTS = 0X22,     /* output a word string */
+  TRAP_IN = 0X23,       /* get a character and echo */
+  TRAP_PUTSP = 0X24,    /* output a byte string */
+  TRAP_HALT = 0X25      /* halt the program */
+};
+
 void update_flag(uint16_t register_data) {
   if(reg[register_data] == 0) {
     reg[R_COND] = FL_ZRO;
