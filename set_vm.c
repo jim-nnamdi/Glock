@@ -9,6 +9,7 @@
 #include "ops_inst_set/load_register_ops.h"
 #include "ops_inst_set/jmp_reg_op.h"
 #include "ops_inst_set/jmp_ops.h"
+#include "ops_inst_set/load_effective_address.h"
 #include "commons/common_set.h"
 
 int main(char* argc, const char* argv[]) {
@@ -80,6 +81,9 @@ int main(char* argc, const char* argv[]) {
       break;
       case OP_JSR:
       jmp_register_operation(instr);
+      break;
+      case OP_LEA:
+      load_effective_addr(instr);
       break;
       case OP_ST:
       break;
