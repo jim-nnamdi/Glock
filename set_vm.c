@@ -4,6 +4,11 @@
 
 #include "ops_inst_set/and_ops.h"
 #include "ops_inst_set/br__ops.h"
+#include "ops_inst_set/load_indirect_ops.h"
+#include "ops_inst_set/load_ops.h"
+#include "ops_inst_set/load_register_ops.h"
+#include "ops_inst_set/jmp_reg_op.h"
+#include "ops_inst_set/jmp_ops.h"
 #include "commons/common_set.h"
 
 int main(char* argc, const char* argv[]) {
@@ -62,6 +67,19 @@ int main(char* argc, const char* argv[]) {
       bitwise_br_ops(instr);
       break;
       case OP_LD:
+      load_operation(instr);
+      break;
+      case OP_LDR:
+      load_register_ins(instr);
+      break;
+      case OP_LDI:
+      load_indirect_register(instr);
+      break;
+      case OP_JMP:
+      jmp_operation(instr);
+      break;
+      case OP_JSR:
+      jmp_register_operation(instr);
       break;
       case OP_ST:
       break;
